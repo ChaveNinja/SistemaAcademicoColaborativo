@@ -1,0 +1,19 @@
+Os programas são executados pelo VSCODE, então precisa baixar o VSCODE e instalar as extensões que baixa no próprio aplicativo.
+
+Todos códigos dessa pasta estão dentro da pasta "cc"
+
+Extensões que precisam ser baixadas:
+Python
+Python Debugger
+C/C++
+C/C++ Compile Run
+
+O programa web usa uma extensão chamada "Flask" para baixa-la, vá em terminal e crie um novo terminal e escreva no terminal: pip install flask
+
+O Flask vai baixar, depois execute o "server_flask.py" vai aparecer informações no terminal e aparecer a seguinte frase: Servidor rodando em: http://192.168.0.2:5000
+
+Abra esse servidor e o site web estará lá.
+
+Quando for finalizar o site o web, pode fechar ele ir no terminal do VSCODE e aperta Ctrl + c para encerrar a rede.
+
+O interface_alunos.py é um app específicos para professores e diretores, uma aplicativo para adicionar alunos e alterar notas.

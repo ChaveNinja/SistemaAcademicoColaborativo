@@ -1,0 +1,38 @@
+[
+  {
+    "usuario": "Diretor",
+    "mensagem": "Olá",
+    "timestamp": "10/11/2025 10:26:50",
+    "perfil": "diretor"
+  },
+  {
+    "usuario": "Diretor",
+    "mensagem": "Fala meu diretor",
+    "timestamp": "10/11/2025 10:27:13",
+    "perfil": "diretor"
+  },
+  {
+    "usuario": "Aluno",
+    "mensagem": "fala ae",
+    "timestamp": "10/11/2025 10:30:25",
+    "perfil": "aluno"
+  },
+  {
+    "usuario": "Professor",
+    "mensagem": "fala galera",
+    "timestamp": "10/11/2025 10:30:41",
+    "perfil": "professor"
+  },
+  {
+    "usuario": "Aluno",
+    "mensagem": "oi",
+    "timestamp": "10/11/2025 10:32:37",
+    "perfil": "aluno"
+  },
+  {
+    "usuario": "Professor",
+    "mensagem": "oi",
+    "timestamp": "10/11/2025 10:33:19",
+    "perfil": "professor"
+  }
+]

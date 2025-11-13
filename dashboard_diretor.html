@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Diretor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-icon {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .btn-action {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 0.3rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 140px;
+        }
+        
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        
+        .table-custom {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .badge-aprovado {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        
+        .badge-reprovado {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        /* Estilos do Chat */
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .chat-message.diretor {
+            border-left: 4px solid #667eea;
+        }
+
+        .chat-message.professor {
+            border-left: 4px solid #4facfe;
+        }
+
+        .chat-message.aluno {
+            border-left: 4px solid #00b09b;
+        }
+
+        .chat-usuario {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .chat-perfil {
+            font-size: 0.7rem;
+            background: #6c757d;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .chat-perfil.diretor { background: #667eea; }
+        .chat-perfil.professor { background: #4facfe; }
+        .chat-perfil.aluno { background: #00b09b; }
+
+        .chat-texto {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .chat-timestamp {
+            font-size: 0.7rem;
+            color: #6c757d;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="h2 fw-bold mb-2">👑 Painel do Diretor</h1>
+                    <p class="mb-0">Gestão completa do sistema educacional</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <button class="btn btn-light btn-sm" onclick="location.reload()">
+                            <i class="fas fa-sync-alt"></i> Atualizar
+                        </button>
+                        <button class="btn btn-success btn-sm me-2" data-bs-toggle="modal" data-bs-target="#modalChat">
+                            <i class="fas fa-comments"></i> Chat
+                        </button>
+                        <a href="/logout" class="btn btn-warning btn-sm">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Estatísticas -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number text-primary">{{ dados.alunos|length }}</div>
+                    <div class="text-muted">Total de Alunos</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-number text-success">
+                        {{ dados.alunos|selectattr('situacao', 'equalto', 'APROVADO')|list|length }}
+                    </div>
+                    <div class="text-muted">Aprovados</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-danger">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-number text-danger">
+                        {{ dados.alunos|selectattr('situacao', 'equalto', 'REPROVADO')|list|length }}
+                    </div>
+                    <div class="text-muted">Reprovados</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-number text-info">
+                        {% set aprovados = dados.alunos|selectattr('situacao', 'equalto', 'APROVADO')|list %}
+                        {% if dados.alunos|length > 0 %}
+                            {{ ((aprovados|length / dados.alunos|length) * 100)|round(1) }}%
+                        {% else %}
+                            0%
+                        {% endif %}
+                    </div>
+                    <div class="text-muted">Taxa de Aprovação</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações Rápidas -->
+        <div class="action-card">
+            <h5 class="mb-3"><i class="fas fa-bolt text-warning"></i> Ações Rápidas</h5>
+            <div class="d-flex flex-wrap">
+                <button class="btn-action" data-bs-toggle="modal" data-bs-target="#modalAdicionar">
+                    <i class="fas fa-user-plus fa-lg mb-2"></i><br>
+                    Adicionar Aluno
+                </button>
+                <button class="btn-action" data-bs-toggle="modal" data-bs-target="#modalTurmas">
+                    <i class="fas fa-school fa-lg mb-2"></i><br>
+                    Gerenciar Turmas
+                </button>
+                <a href="/relatorios" class="btn-action" style="text-decoration: none; display: inline-block;">
+                    <i class="fas fa-chart-bar fa-lg mb-2"></i><br>
+                    Relatórios
+                </a>
+                <button class="btn-action" onclick="exportarDados()">
+                    <i class="fas fa-download fa-lg mb-2"></i><br>
+                    Exportar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabela de Alunos -->
+        <div class="table-custom">
+            <div class="p-3 bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-list"></i> Lista de Alunos</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Turma</th>
+                            <th>Matrícula</th>
+                            <th>Aluno</th>
+                            <th>NP1</th>
+                            <th>NP2</th>
+                            <th>PIM</th>
+                            <th>Média</th>
+                            <th>Situação</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aluno in dados.alunos %}
+                        <tr>
+                            <td>
+                                <strong>{{ aluno.cod_turma }}</strong>
+                                <br>
+                                <small class="text-muted">{{ aluno.turma_nome }}</small>
+                            </td>
+                            <td><code>{{ aluno.matricula }}</code></td>
+                            <td><strong>{{ aluno.nome }}</strong></td>
+                            <td>{{ aluno.np1 }}</td>
+                            <td>{{ aluno.np2 }}</td>
+                            <td>{{ aluno.pim }}</td>
+                            <td><strong>{{ aluno.media }}</strong></td>
+                            <td>
+                                {% if aluno.situacao == 'APROVADO' %}
+                                    <span class="badge-aprovado">Aprovado</span>
+                                {% else %}
+                                    <span class="badge-reprovado">Reprovado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <button class="btn btn-outline-primary btn-editar" 
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#modalEditar"
+                                            data-cod-turma="{{ aluno.cod_turma }}"
+                                            data-matricula="{{ aluno.matricula }}"
+                                            data-nome="{{ aluno.nome }}"
+                                            data-np1="{{ aluno.np1 }}"
+                                            data-np2="{{ aluno.np2 }}"
+                                            data-pim="{{ aluno.pim }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form action="/remover_aluno" method="POST" style="display: inline;">
+                                        <input type="hidden" name="nome" value="{{ aluno.nome }}">
+                                        <button type="submit" class="btn btn-outline-danger" 
+                                                onclick="return confirm('Remover aluno {{ aluno.nome }}?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Aluno -->
+    <div class="modal fade" id="modalEditar" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-edit"></i> Editar Aluno</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/editar_aluno" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-nome-antigo" name="nome_antigo">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Código da Turma:</label>
+                                    <input type="text" id="edit-cod-turma" name="cod_turma" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Matrícula:</label>
+                                    <input type="text" id="edit-matricula" name="matricula" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nome do Aluno:</label>
+                            <input type="text" id="edit-nome" name="nome" class="form-control">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">NP1:</label>
+                                    <input type="number" step="0.1" min="0" max="10" id="edit-np1" name="np1" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">NP2:</label>
+                                    <input type="number" step="0.1" min="0" max="10" id="edit-np2" name="np2" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">PIM:</label>
+                                    <input type="number" step="0.1" min="0" max="10" id="edit-pim" name="pim" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Aluno -->
+    <div class="modal fade" id="modalAdicionar" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus"></i> Adicionar Aluno</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/adicionar_aluno" method="POST">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Código da Turma:</label>
+                            <input type="text" name="cod_turma" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Matrícula:</label>
+                            <input type="text" name="matricula" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nome do Aluno:</label>
+                            <input type="text" name="nome" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Adicionar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gerenciar Turmas -->
+    <div class="modal fade" id="modalTurmas" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-school"></i> Gerenciar Turmas</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h6><i class="fas fa-plus-circle"></i> Adicionar Nova Turma:</h6>
+                        <form action="/adicionar_turma" method="POST" class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" name="codigo" class="form-control" placeholder="Código (Ex: 1, ADS2024)" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" name="nome" class="form-control" placeholder="Nome da Turma" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success btn-sm">
+                                    <i class="fas fa-save"></i> Adicionar Turma
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <hr>
+                    
+                    <h6><i class="fas fa-list"></i> Turmas Existentes:</h6>
+                    {% if dados.turmas %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nome da Turma</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for codigo, nome in dados.turmas.items() %}
+                                <tr>
+                                    <td><code>{{ codigo }}</code></td>
+                                    <td>{{ nome }}</td>
+                                    <td>
+                                        <form action="/remover_turma" method="POST" style="display: inline;">
+                                            <input type="hidden" name="codigo" value="{{ codigo }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                                    onclick="return confirm('Tem certeza que deseja remover a turma {{ nome }}?')">
+                                                <i class="fas fa-trash"></i> Remover
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Nenhuma turma cadastrada.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal do Chat -->
+    <div class="modal fade" id="modalChat" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-comments"></i> Chat da Escola</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="chat-container" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 15px; background: #f8f9fa;">
+                        <div id="chat-messages">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-comment-slash fa-2x mb-2"></i>
+                                <p>Carregando mensagens...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <form id="form-chat">
+                            <div class="input-group">
+                                <input type="text" id="mensagem-chat" class="form-control" placeholder="Digite sua mensagem..." maxlength="500">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </form>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> Chat público - todas as mensagens são visíveis para todos os usuários
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Preencher modal de edição
+        document.addEventListener('DOMContentLoaded', function() {
+            const botoesEditar = document.querySelectorAll('.btn-editar');
+            botoesEditar.forEach(botao => {
+                botao.addEventListener('click', function() {
+                    const codTurma = this.getAttribute('data-cod-turma');
+                    const matricula = this.getAttribute('data-matricula');
+                    const nome = this.getAttribute('data-nome');
+                    const np1 = this.getAttribute('data-np1');
+                    const np2 = this.getAttribute('data-np2');
+                    const pim = this.getAttribute('data-pim');
+                    
+                    document.getElementById('edit-cod-turma').value = codTurma;
+                    document.getElementById('edit-matricula').value = matricula;
+                    document.getElementById('edit-nome').value = nome;
+                    document.getElementById('edit-nome-antigo').value = nome;
+                    document.getElementById('edit-np1').value = np1;
+                    document.getElementById('edit-np2').value = np2;
+                    document.getElementById('edit-pim').value = pim;
+                });
+            });
+        });
+
+        function exportarDados() {
+            window.location.href = '/exportar/csv';
+        }
+
+        function gerarRelatorio() {
+            window.location.href = 'relatorios';
+        }
+
+        // ========== SISTEMA DE CHAT ==========
+        let chatAtualizando = false;
+
+        function carregarChat() {
+            if (chatAtualizando) return;
+            
+            chatAtualizando = true;
+            fetch('/chat_mensagens')
+                .then(response => response.json())
+                .then(mensagens => {
+                    const container = document.getElementById('chat-messages');
+                    container.innerHTML = '';
+                    
+                    if (mensagens.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center text-muted">
+                                <i class="fas fa-comments fa-2x mb-2"></i>
+                                <p>Nenhuma mensagem ainda. Seja o primeiro a conversar!</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    mensagens.forEach(msg => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `chat-message ${msg.perfil}`;
+                        messageDiv.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="chat-usuario">${msg.usuario}</span>
+                                    <span class="chat-perfil ${msg.perfil}">${msg.perfil}</span>
+                                </div>
+                                <small class="chat-timestamp">${msg.timestamp}</small>
+                            </div>
+                            <div class="chat-texto">${msg.mensagem}</div>
+                        `;
+                        container.appendChild(messageDiv);
+                    });
+                    
+                    // Rolagem automática para a última mensagem
+                    container.scrollTop = container.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar chat:', error);
+                })
+                .finally(() => {
+                    chatAtualizando = false;
+                });
+        }
+
+        // Enviar mensagem
+        document.getElementById('form-chat').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mensagemInput = document.getElementById('mensagem-chat');
+            const mensagem = mensagemInput.value.trim();
+            
+            if (!mensagem) return;
+            
+            // Desabilita o input enquanto envia
+            mensagemInput.disabled = true;
+            
+            fetch('/enviar_mensagem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `mensagem=${encodeURIComponent(mensagem)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'sucesso') {
+                    mensagemInput.value = '';
+                    carregarChat(); // Recarrega as mensagens
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar mensagem:', error);
+                alert('Erro ao enviar mensagem. Tente novamente.');
+            })
+            .finally(() => {
+                mensagemInput.disabled = false;
+                mensagemInput.focus();
+            });
+        });
+
+        // Atualização automática do chat a cada 3 segundos quando o modal estiver aberto
+        let chatInterval;
+        document.getElementById('modalChat').addEventListener('shown.bs.modal', function() {
+            carregarChat();
+            chatInterval = setInterval(carregarChat, 3000);
+        });
+
+        document.getElementById('modalChat').addEventListener('hidden.bs.modal', function() {
+            clearInterval(chatInterval);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Aluno</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .student-header {
+            background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+            color: white;
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            border-left: 4px solid #00b09b;
+        }
+        
+        .grades-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+        }
+        
+        .grade-item {
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #00b09b;
+            background: #f8f9fa;
+        }
+        
+        .grade-good {
+            border-left-color: #28a745;
+            background: #f8fff9;
+        }
+        
+        .grade-bad {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+        
+        .status-aprovado {
+            background: #28a745;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .status-reprovado {
+            background: #dc3545;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        
+        .permission-alert {
+            border-left: 4px solid #00b09b;
+            background: #e8f5e8;
+        }
+
+        /* Estilos do Chat */
+        .chat-message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .chat-message.diretor {
+            border-left: 4px solid #667eea;
+        }
+
+        .chat-message.professor {
+            border-left: 4px solid #4facfe;
+        }
+
+        .chat-message.aluno {
+            border-left: 4px solid #00b09b;
+        }
+
+        .chat-usuario {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .chat-perfil {
+            font-size: 0.7rem;
+            background: #6c757d;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+
+        .chat-perfil.diretor { background: #667eea; }
+        .chat-perfil.professor { background: #4facfe; }
+        .chat-perfil.aluno { background: #00b09b; }
+
+        .chat-texto {
+            margin: 5px 0;
+            font-size: 0.95rem;
+        }
+
+        .chat-timestamp {
+            font-size: 0.7rem;
+            color: #6c757d;
+            text-align: right;
+        }
+
+        /* Estilos do Chat IA */
+        .chat-message.ia-message {
+            border-left: 4px solid #6f42c1;
+            background: white;
+        }
+
+        .chat-perfil.ia {
+            background: #6f42c1 !important;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .typing-indicator .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #6c757d;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator .dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Botão IA destacado */
+        .btn-ia-destaque {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-weight: bold;
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-ia-destaque:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            color: white;
+        }
+
+        .badge-novidade {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .ia-button-container {
+            position: relative;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="student-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h2 fw-bold mb-2">👨‍🎓 Painel do Aluno</h1>
+                    <p class="mb-0">Acompanhe suas notas e desempenho</p>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex justify-content-end align-items-center gap-3">
+                        <!-- BOTÃO DA IA SUPER DESTACADO -->
+                        <div class="ia-button-container">
+                            <button class="btn btn-ia-destaque btn-lg fw-bold" data-bs-toggle="modal" data-bs-target="#modalIA">
+                                <i class="fas fa-robot me-2"></i>Assistente IA
+                            </button>
+                            <span class="badge-novidade">!</span>
+                        </div>
+                        
+                        <div class="vr bg-light opacity-50" style="height: 30px;"></div>
+                        
+                        <div class="btn-group">
+                            <button class="btn btn-outline-light btn-sm" onclick="location.reload()">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                            <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#modalChat">
+                                <i class="fas fa-comments"></i>
+                            </button>
+                            <a href="/logout" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Card de Destaque da IA -->
+        <div class="card border-0 shadow-lg mb-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body text-white">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="card-title mb-2">
+                            <i class="fas fa-robot me-2"></i>Assistente de Estudos IA
+                        </h5>
+                        <p class="card-text mb-0">Tire suas dúvidas sobre notas, matérias, métodos de estudo e muito mais!</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-light btn-lg fw-bold" data-bs-toggle="modal" data-bs-target="#modalIA">
+                            <i class="fas fa-comments me-2"></i>Conversar Agora
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerta de Permissões -->
+        <div class="alert permission-alert mb-4">
+            <i class="fas fa-info-circle text-success"></i>
+            <strong>Painel de Visualização:</strong> Você pode apenas visualizar suas notas e desempenho.
+        </div>
+
+        {% if dados.erro %}
+        <div class="alert alert-danger">
+            {{ dados.erro }}
+        </div>
+        {% else %}
+        
+        <!-- Informações do Aluno -->
+        <div class="info-card">
+            <h5 class="mb-3"><i class="fas fa-user-graduate text-success"></i> Meu Desempenho</h5>
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-user fa-2x text-primary mb-2"></i>
+                        <h6>Meu Nome</h6>
+                        <p class="fw-bold text-muted">{{ session.nome_perfil }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-school fa-2x text-info mb-2"></i>
+                        <h6>Minha Turma</h6>
+                        <p class="fw-bold text-muted">
+                            {% if dados.alunos %}
+                                {{ dados.alunos[0].cod_turma }} - {{ dados.alunos[0].turma_nome }}
+                            {% else %}
+                                Não identificada
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                        <h6>Situação</h6>
+                        <p class="fw-bold">
+                            {% if dados.alunos and dados.alunos[0].media|float >= 7 %}
+                                <span class="status-aprovado">APROVADO</span>
+                            {% else %}
+                                <span class="status-reprovado">REPROVADO</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notas do Aluno -->
+        <div class="grades-card">
+            <h5 class="mb-4"><i class="fas fa-book-open text-success"></i> Minhas Notas</h5>
+            
+            {% if dados.alunos %}
+            {% set aluno = dados.alunos[0] %}
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="grade-item {% if aluno.np1|float >= 7 %}grade-good{% else %}grade-bad{% endif %}">
+                        <h6>NP1</h6>
+                        <div class="display-4 fw-bold {% if aluno.np1|float >= 7 %}text-success{% else %}text-danger{% endif %}">
+                            {{ aluno.np1 }}
+                        </div>
+                        <small class="text-muted">Nota Parcial 1</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="grade-item {% if aluno.np2|float >= 7 %}grade-good{% else %}grade-bad{% endif %}">
+                        <h6>NP2</h6>
+                        <div class="display-4 fw-bold {% if aluno.np2|float >= 7 %}text-success{% else %}text-danger{% endif %}">
+                            {{ aluno.np2 }}
+                        </div>
+                        <small class="text-muted">Nota Parcial 2</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="grade-item {% if aluno.pim|float >= 7 %}grade-good{% else %}grade-bad{% endif %}">
+                        <h6>PIM</h6>
+                        <div class="display-4 fw-bold {% if aluno.pim|float >= 7 %}text-success{% else %}text-danger{% endif %}">
+                            {{ aluno.pim }}
+                        </div>
+                        <small class="text-muted">Projeto Integrado</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="grade-item {% if aluno.media|float >= 7 %}grade-good{% else %}grade-bad{% endif %}">
+                        <h6>MÉDIA FINAL</h6>
+                        <div class="display-4 fw-bold {% if aluno.media|float >= 7 %}text-success{% else %}text-danger{% endif %}">
+                            {{ aluno.media }}
+                        </div>
+                        <small class="text-muted">Média Final</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informações da Média -->
+            <div class="mt-4 p-3 bg-light rounded">
+                <h6><i class="fas fa-calculator text-success"></i> Como é calculada a média?</h6>
+                <p class="mb-2">Média = (NP1 × 0.4) + (NP2 × 0.4) + (PIM × 0.2)</p>
+                <p class="mb-0">
+                    <strong>Critério de aprovação:</strong> 
+                    {% if aluno.media|float >= 7 %}
+                        <span class="text-success">Média ≥ 7.0 - Parabéns, você está aprovado! 🎉</span>
+                    {% else %}
+                        <span class="text-danger">Média < 7.0 - Você precisa melhorar suas notas.</span>
+                    {% endif %}
+                </p>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                <p class="text-muted">Nenhum dado encontrado para o aluno.</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal do Chat -->
+    <div class="modal fade" id="modalChat" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-comments"></i> Chat da Escola</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="chat-container" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 15px; background: #f8f9fa;">
+                        <div id="chat-messages">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-comment-slash fa-2x mb-2"></i>
+                                <p>Carregando mensagens...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <form id="form-chat">
+                            <div class="input-group">
+                                <input type="text" id="mensagem-chat" class="form-control" placeholder="Digite sua mensagem..." maxlength="500">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </form>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> Chat público - todas as mensagens são visíveis para todos os usuários
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal do Assistente IA -->
+    <div class="modal fade" id="modalIA" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content border-0">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h5 class="modal-title">
+                        <i class="fas fa-robot me-2"></i>Assistente de Estudos IA
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        <strong>Assistente Educacional:</strong> Posso ajudar com dúvidas sobre notas, estudos, materiais e muito mais!
+                    </div>
+                    
+                    <div class="chat-container-ia" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 15px; background: #f8f9fa; margin-bottom: 15px;">
+                        <div id="chat-ia-messages">
+                            <div class="chat-message ia-message">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <span class="chat-usuario">Assistente IA</span>
+                                        <span class="chat-perfil ia">IA</span>
+                                    </div>
+                                </div>
+                                <div class="chat-texto">
+                                    Olá! Sou seu assistente de estudos. Posso ajudar com dúvidas sobre:
+                                    <ul class="mb-0 mt-2">
+                                        <li>Notas e avaliações</li>
+                                        <li>Métodos de estudo</li>
+                                        <li>Materiais e recursos</li>
+                                        <li>Frequência e presença</li>
+                                        <li>Projetos e trabalhos</li>
+                                    </ul>
+                                    Em que posso ajudá-lo hoje?
+                                </div>
+                                <div class="chat-timestamp">Agora</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <form id="form-chat-ia">
+                            <div class="input-group">
+                                <input type="text" id="mensagem-ia" class="form-control" placeholder="Digite sua pergunta para a IA..." maxlength="500">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i> Enviar
+                                </button>
+                            </div>
+                        </form>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> As respostas são geradas por IA e podem conter imprecisões
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ========== SISTEMA DE CHAT ==========
+        let chatAtualizando = false;
+
+        function carregarChat() {
+            if (chatAtualizando) return;
+            
+            chatAtualizando = true;
+            fetch('/chat_mensagens')
+                .then(response => response.json())
+                .then(mensagens => {
+                    const container = document.getElementById('chat-messages');
+                    container.innerHTML = '';
+                    
+                    if (mensagens.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center text-muted">
+                                <i class="fas fa-comments fa-2x mb-2"></i>
+                                <p>Nenhuma mensagem ainda. Seja o primeiro a conversar!</p>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    mensagens.forEach(msg => {
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `chat-message ${msg.perfil}`;
+                        messageDiv.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <span class="chat-usuario">${msg.usuario}</span>
+                                    <span class="chat-perfil ${msg.perfil}">${msg.perfil}</span>
+                                </div>
+                                <small class="chat-timestamp">${msg.timestamp}</small>
+                            </div>
+                            <div class="chat-texto">${msg.mensagem}</div>
+                        `;
+                        container.appendChild(messageDiv);
+                    });
+                    
+                    // Rolagem automática para a última mensagem
+                    container.scrollTop = container.scrollHeight;
+                })
+                .catch(error => {
+                    console.error('Erro ao carregar chat:', error);
+                })
+                .finally(() => {
+                    chatAtualizando = false;
+                });
+        }
+
+        // Enviar mensagem
+        document.getElementById('form-chat').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mensagemInput = document.getElementById('mensagem-chat');
+            const mensagem = mensagemInput.value.trim();
+            
+            if (!mensagem) return;
+            
+            // Desabilita o input enquanto envia
+            mensagemInput.disabled = true;
+            
+            fetch('/enviar_mensagem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `mensagem=${encodeURIComponent(mensagem)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'sucesso') {
+                    mensagemInput.value = '';
+                    carregarChat(); // Recarrega as mensagens
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar mensagem:', error);
+                alert('Erro ao enviar mensagem. Tente novamente.');
+            })
+            .finally(() => {
+                mensagemInput.disabled = false;
+                mensagemInput.focus();
+            });
+        });
+
+        // Atualização automática do chat a cada 3 segundos quando o modal estiver aberto
+        let chatInterval;
+        document.getElementById('modalChat').addEventListener('shown.bs.modal', function() {
+            carregarChat();
+            chatInterval = setInterval(carregarChat, 3000);
+        });
+
+        document.getElementById('modalChat').addEventListener('hidden.bs.modal', function() {
+            clearInterval(chatInterval);
+        });
+
+        // ========== SISTEMA DE CHAT COM IA ==========
+        document.getElementById('form-chat-ia').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const mensagemInput = document.getElementById('mensagem-ia');
+            const mensagem = mensagemInput.value.trim();
+            
+            if (!mensagem) return;
+            
+            // Adiciona a mensagem do usuário ao chat
+            adicionarMensagemUsuario(mensagem);
+            mensagemInput.value = '';
+            
+            // Mostra indicador de digitação
+            mostrarDigitando();
+            
+            // Envia para a IA
+            fetch('/chat_ia', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `mensagem=${encodeURIComponent(mensagem)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                esconderDigitando();
+                
+                if (data.status === 'sucesso') {
+                    adicionarMensagemIA(data.resposta, data.timestamp);
+                } else {
+                    adicionarMensagemIA('Desculpe, ocorreu um erro. Tente novamente.', 'Erro');
+                }
+            })
+            .catch(error => {
+                esconderDigitando();
+                console.error('Erro ao conversar com IA:', error);
+                adicionarMensagemIA('Erro de conexão. Verifique sua internet e tente novamente.', 'Erro');
+            });
+        });
+
+        function adicionarMensagemUsuario(mensagem) {
+            const container = document.getElementById('chat-ia-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message aluno';
+            messageDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="chat-usuario">Você</span>
+                        <span class="chat-perfil aluno">Aluno</span>
+                    </div>
+                    <small class="chat-timestamp">Agora</small>
+                </div>
+                <div class="chat-texto">${mensagem}</div>
+            `;
+            container.appendChild(messageDiv);
+            rolarParaBaixoIA();
+        }
+
+        function adicionarMensagemIA(mensagem, timestamp) {
+            const container = document.getElementById('chat-ia-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message ia-message';
+            messageDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <span class="chat-usuario">Assistente IA</span>
+                        <span class="chat-perfil ia">IA</span>
+                    </div>
+                    <small class="chat-timestamp">${timestamp}</small>
+                </div>
+                <div class="chat-texto">${mensagem}</div>
+            `;
+            container.appendChild(messageDiv);
+            rolarParaBaixoIA();
+        }
+
+        function mostrarDigitando() {
+            const container = document.getElementById('chat-ia-messages');
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <span>Assistente IA está digitando</span>
+                    <div class="ms-2">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(typingDiv);
+            rolarParaBaixoIA();
+            typingDiv.style.display = 'block';
+        }
+
+        function esconderDigitando() {
+            const typingDiv = document.getElementById('typing-indicator');
+            if (typingDiv) {
+                typingDiv.remove();
+            }
+        }
+
+        function rolarParaBaixoIA() {
+            const container = document.querySelector('.chat-container-ia');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Limpar chat quando o modal for fechado
+        document.getElementById('modalIA').addEventListener('hidden.bs.modal', function() {
+            // Mantém apenas a mensagem inicial
+            const container = document.getElementById('chat-ia-messages');
+            const initialMessage = container.querySelector('.ia-message');
+            container.innerHTML = '';
+            if (initialMessage) {
+                container.appendChild(initialMessage);
+            }
+        });
+    </script>
+</body>
+</html>

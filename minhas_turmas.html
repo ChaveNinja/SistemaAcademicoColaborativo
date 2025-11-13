@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Turmas - Professor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header-card {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+            border-radius: 15px;
+        }
+        .turma-card {
+            background: white;
+            border-radius: 15px;
+            border-left: 5px solid #4facfe;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .turma-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+        }
+        .aluno-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid #28a745;
+        }
+        .badge-turma {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <!-- Cabeçalho -->
+        <div class="header-card p-4 mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="fw-bold mb-2"><i class="fas fa-school me-2"></i>Minhas Turmas</h2>
+                    <p class="mb-0">Visualize todas as turmas e alunos sob sua responsabilidade</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="/dashboard" class="btn btn-light">
+                        <i class="fas fa-arrow-left me-2"></i>Voltar ao Painel
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo Geral -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-school fa-2x mb-2"></i>
+                    <h4>{{ dados.turmas|length }}</h4>
+                    <small>Total de Turmas</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h4>{{ dados.alunos|length }}</h4>
+                    <small>Total de Alunos</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <h4>{{ dados.alunos|selectattr('situacao', 'equalto', 'APROVADO')|list|length }}</h4>
+                    <small>Alunos Aprovados</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                    <h4>
+                        {% if dados.alunos %}
+                            {{ "%.1f"|format(dados.alunos | map(attribute='media') | map('float') | sum / dados.alunos|length) }}
+                        {% else %}
+                            0.0
+                        {% endif %}
+                    </h4>
+                    <small>Média Geral</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Turmas -->
+        <div class="row">
+            {% for codigo, nome_turma in dados.turmas.items() %}
+            <div class="col-lg-6 mb-4">
+                <div class="turma-card p-4">
+                    <!-- Cabeçalho da Turma -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h4 class="fw-bold text-primary mb-1">{{ nome_turma }}</h4>
+                            <p class="text-muted mb-0"><i class="fas fa-hashtag me-1"></i>Código: {{ codigo }}</p>
+                        </div>
+                        <span class="badge bg-primary badge-turma">
+                            <i class="fas fa-user-graduate me-1"></i>
+                            {% set alunos_turma = dados.alunos | selectattr('cod_turma', 'equalto', codigo) | list %}
+                            {{ alunos_turma|length }} aluno{{ 's' if alunos_turma|length != 1 else '' }}
+                        </span>
+                    </div>
+
+                    <!-- Estatísticas da Turma -->
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="text-success">
+                                <h5 class="fw-bold mb-1">
+                                    {{ alunos_turma | selectattr('situacao', 'equalto', 'APROVADO') | list | length }}
+                                </h5>
+                                <small class="text-muted">Aprovados</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-warning">
+                                <h5 class="fw-bold mb-1">
+                                    {{ alunos_turma | selectattr('situacao', 'equalto', 'REPROVADO') | list | length }}
+                                </h5>
+                                <small class="text-muted">Reprovados</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-info">
+                                <h5 class="fw-bold mb-1">
+                                    {% if alunos_turma %}
+                                        {{ "%.1f"|format(alunos_turma | map(attribute='media') | map('float') | sum / alunos_turma|length) }}
+                                    {% else %}
+                                        0.0
+                                    {% endif %}
+                                </h5>
+                                <small class="text-muted">Média</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Alunos -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold mb-2">
+                            <i class="fas fa-list me-1"></i>
+                            Lista de Alunos ({{ alunos_turma|length }})
+                        </h6>
+                        
+                        {% if alunos_turma %}
+                            <div style="max-height: 300px; overflow-y: auto;">
+                                {% for aluno in alunos_turma %}
+                                <div class="aluno-item">
+                                    <div class="row align-items-center">
+                                        <div class="col-8">
+                                            <strong>{{ aluno.nome }}</strong>
+                                            <br>
+                                            <small class="text-muted">Mat: {{ aluno.matricula }}</small>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                            <span class="badge {% if aluno.media|float >= 7 %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ aluno.media }}
+                                            </span>
+                                            <br>
+                                            <small class="{% if aluno.situacao == 'APROVADO' %}text-success{% else %}text-danger{% endif %}">
+                                                {{ aluno.situacao }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted py-3">
+                                <i class="fas fa-user-slash fa-2x mb-2"></i>
+                                <p>Nenhum aluno matriculado</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Botões de Ação -->
+<div class="d-grid">
+    <a href="/faltas?turma={{ codigo }}" class="btn btn-warning">
+        <i class="fas fa-calendar-times me-2"></i>Controle de Faltas
+    </a>
+</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center text-muted py-5">
+                        <i class="fas fa-school fa-3x mb-3"></i>
+                        <h5>Nenhuma turma encontrada</h5>
+                        <p>Não há turmas atribuídas ao professor no momento</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
